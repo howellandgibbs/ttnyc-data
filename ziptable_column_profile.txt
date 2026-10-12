@@ -1,0 +1,65 @@
+ZIP TABLE SPECIFICATION
+
+Table                 : Housing Court cases by ZIP code (ZIP code is the Zone Improvement Plan code)
+File                  : ziptable.csv
+Built by              : build_zip_table.py
+Source                : Housing Data Coalition (HDC) extract of Office of Court Administration (OCA) Housing Court records,
+                        tables oca_index and oca_addresses, https://oca-2-dev.s3.amazonaws.com/public/
+ZIP code list         : the ZIP codes on at least one New York City tax lot in PLUTO (Primary Land Use Tax Lot Output)
+Created               : 2026-10-12 17:24
+Number of columns     : 14
+Number of rows        : 4,340 (217 ZIP codes times 10 years times 2 property groups)
+
+The data types are the types build_zip_table.py writes.
+This program checked every value in the table against them before it wrote this file.
+
+A CSV (comma-separated values) file stores only text. Read the zip column as text.
+
+(script) means build_zip_table.py decides it.
+(source) means the value comes from a Housing Data Coalition column, named in the line.
+
+Position  Column name                          Data type  What it does
+------------------------------------------------------------------------------------------------------------------------------------------
+1         zip                                  text       ZIP code of the property. It is the first 5 characters of postalcode from the
+                                                          first address row of the case. Only the ZIP codes in the PLUTO list are in the
+                                                          table. Always 5 digits. (source, script)
+2         year                                 number     Year the case was filed. It is the first 4 characters of fileddate. (source,
+                                                          script)
+3         property_group                       text       Either residential or plus commercial. The group residential counts cases with
+                                                          property type Residential. The group plus commercial counts cases with property
+                                                          type Residential plus cases with property type Commercial. Never add the two
+                                                          rows together, because plus commercial already contains the residential cases.
+                                                          (source: propertytype, script)
+4         total_cases                          number     Number of cases for the ZIP code, year, and property group. It is counted on its
+                                                          own, without looking at the case type. (script)
+5         non_payment                          number     Cases with case type Non-Payment. (source: classification)
+6         holdover                             number     Cases with case type Holdover. (source: classification)
+7         hp                                   number     Cases with case type HP. HP is the source's own label. (source: classification)
+8         illegal_lockout                      number     Cases with case type Illegal Lockout. (source: classification)
+9         hp_with_harassment                   number     Cases with case type HP with Harassment. (source: classification)
+10        harassment                           number     Cases with case type Harassment. (source: classification)
+11        illegal_activity                     number     Cases with case type Illegal Activity. (source: classification)
+12        article_7a                           number     Cases with case type Article 7A. (source: classification)
+13        breach_of_warrant_of_habitability    number     Cases with case type Breach of Warrant of Habitability. (source: classification)
+14        unclassified                         number     Cases with any other case type, or with a blank case type. (script)
+
+Rules this program checked in the table
+
+1. In every row, the case type columns, including unclassified, add up to total_cases.
+2. Every ZIP code has a row for every year and for both property groups. A count is 0 when there were no
+   cases.
+3. Rows are sorted by ZIP code, then year, then property group, with residential first.
+4. Every value except zip and property_group is a whole number made of digits only. So the table cannot hold a
+   name, an address, or a case code in those columns.
+
+Rules from the project decisions and the table builder. This program cannot check them from the table alone.
+
+1. Every value is a count of cases. The table has no rates.
+2. Only cases from the Bronx, Kings, New York, Queens, and Richmond County Civil Courts, the Harlem Community
+   Justice Center, and the Redhook Community Justice Center are counted. The last two are assumed to be New
+   York City by name. This is not confirmed.
+3. Cases filed from 2016 to 2025 are counted. Cases filed in 2026 or later are not in the table, because those
+   years were not finished when the table was built.
+4. Cases with a ZIP code that is not in the PLUTO list are not in the table.
+5. The table describes a neighborhood. It does not describe one building. A ZIP code count must never be
+   called a building-level fact.
