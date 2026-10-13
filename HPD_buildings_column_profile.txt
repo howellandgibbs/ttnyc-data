@@ -1,0 +1,210 @@
+Profile of Buildings Subject to HPD / Housing Preservation and Development Jurisdiction (kj4p-ruqc)
+Rows the source reported: 380119
+Data rows in the saved file: 380119
+Rows with the wrong number of values: 0
+Columns: 23
+
+1. buildingid
+   Blank values: 0 (0.0 percent)
+   Different values: 380119
+   Shortest value length: 1
+   Longest value length: 7
+   Type guess: whole number
+
+2. boroid
+   Blank values: 0 (0.0 percent)
+   Different values: 5
+   Shortest value length: 1
+   Longest value length: 1
+   Type guess: whole number
+   Values and counts:
+      3: 149039
+      4: 116877
+      2: 51302
+      1: 40694
+      5: 22207
+
+3. boro
+   Blank values: 0 (0.0 percent)
+   Different values: 5
+   Shortest value length: 5
+   Longest value length: 13
+   Type guess: text
+   Values and counts:
+      BROOKLYN: 149039
+      QUEENS: 116877
+      BRONX: 51302
+      MANHATTAN: 40694
+      STATEN ISLAND: 22207
+
+4. housenumber
+   Blank values: 0 (0.0 percent)
+   Different values: 26881
+   Shortest value length: 1
+   Longest value length: 12
+   Type guess: mixed: text 114148, whole number 265971
+
+5. lowhousenumber
+   Blank values: 66 (0.0 percent)
+   Different values: 26998
+   Shortest value length: 1
+   Longest value length: 12
+   Type guess: mixed: text 114178, whole number 265875
+
+6. highhousenumber
+   Blank values: 0 (0.0 percent)
+   Different values: 27111
+   Shortest value length: 1
+   Longest value length: 12
+   Type guess: mixed: text 114225, whole number 265894
+
+7. streetname
+   Blank values: 0 (0.0 percent)
+   Different values: 8448
+   Shortest value length: 1
+   Longest value length: 32
+   Type guess: mixed: text 380111, whole number 8
+
+8. zip
+   Blank values: 1121 (0.3 percent)
+   Different values: 221
+   Shortest value length: 3
+   Longest value length: 5
+   Type guess: whole number
+
+9. block
+   Blank values: 0 (0.0 percent)
+   Different values: 13390
+   Shortest value length: 1
+   Longest value length: 5
+   Type guess: whole number
+
+10. lot
+   Blank values: 0 (0.0 percent)
+   Different values: 1353
+   Shortest value length: 1
+   Longest value length: 4
+   Type guess: whole number
+
+11. bin
+   Blank values: 11989 (3.2 percent)
+   Different values: 356862
+   Shortest value length: 1
+   Longest value length: 8
+   Type guess: whole number
+
+12. communityboard
+   Blank values: 0 (0.0 percent)
+   Different values: 42
+   Shortest value length: 1
+   Longest value length: 2
+   Type guess: whole number
+
+13. censustract
+   Blank values: 1102 (0.3 percent)
+   Different values: 2339
+   Shortest value length: 1
+   Longest value length: 6
+   Type guess: mixed: decimal number 2, whole number 379015
+
+14. managementprogram
+   Blank values: 0 (0.0 percent)
+   Different values: 15
+   Shortest value length: 2
+   Longest value length: 15
+   Type guess: text
+   Values and counts:
+      PVT: 375520
+      NYCHA: 1978
+      CENTRAL MGT: 1413
+      M-L (STATE): 464
+      M-L (NRF CITY): 231
+      LOFT LAW: 204
+      M-L (RF CITY): 141
+      DRES: 75
+      ALT MGT: 31
+      7A: 28
+      HPD O SITE: 18
+      UNDEFINED: 13
+      DRES RES PRO: 1
+      LOW INCOME RENT: 1
+      NYPD HPD_J: 1
+
+15. dobbuildingclassid
+   Blank values: 13477 (3.5 percent)
+   Different values: 33
+   Shortest value length: 1
+   Longest value length: 2
+   Type guess: whole number
+
+16. dobbuildingclass
+   Blank values: 13477 (3.5 percent)
+   Different values: 33
+   Shortest value length: 9
+   Longest value length: 35
+   Type guess: text
+
+17. legalstories
+   Blank values: 14335 (3.8 percent)
+   Different values: 81
+   Shortest value length: 1
+   Longest value length: 3
+   Type guess: whole number
+
+18. legalclassa
+   Blank values: 14608 (3.8 percent)
+   Different values: 600
+   Shortest value length: 1
+   Longest value length: 4
+   Type guess: whole number
+
+19. legalclassb
+   Blank values: 23855 (6.3 percent)
+   Different values: 387
+   Shortest value length: 1
+   Longest value length: 4
+   Type guess: whole number
+
+20. registrationid
+   Blank values: 0 (0.0 percent)
+   Different values: 196344
+   Shortest value length: 1
+   Longest value length: 6
+   Type guess: whole number
+
+21. lifecycle
+   Blank values: 0 (0.0 percent)
+   Different values: 6
+   Shortest value length: 4
+   Longest value length: 17
+   Type guess: text
+   Values and counts:
+      Building: 363577
+      Demolished: 10604
+      Land: 4953
+      Planned: 532
+      UnderConstruction: 450
+      Undetermined: 3
+
+22. recordstatusid
+   Blank values: 0 (0.0 percent)
+   Different values: 3
+   Shortest value length: 1
+   Longest value length: 1
+   Type guess: whole number
+   Values and counts:
+      1: 353622
+      2: 24990
+      3: 1507
+
+23. recordstatus
+   Blank values: 0 (0.0 percent)
+   Different values: 3
+   Shortest value length: 6
+   Longest value length: 8
+   Type guess: text
+   Values and counts:
+      Active: 353622
+      Inactive: 24990
+      Pending: 1507
+
