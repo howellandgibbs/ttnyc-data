@@ -1,21 +1,21 @@
 ZIP TABLE SPECIFICATION
 
 Table                 : Housing Court cases by ZIP code (ZIP code is the Zone Improvement Plan code)
-File                  : ziptable.csv
-Built by              : build_zip_table.py
+File                  : zip_housing_court.csv
+Built by              : ziptable_build.py
 Source                : Housing Data Coalition (HDC) extract of Office of Court Administration (OCA) Housing Court records,
                         tables oca_index and oca_addresses, https://oca-2-dev.s3.amazonaws.com/public/
 ZIP code list         : the ZIP codes on at least one New York City tax lot in PLUTO (Primary Land Use Tax Lot Output)
-Created               : 2026-10-12 17:24
+Created               : 2026-10-13 18:07
 Number of columns     : 14
 Number of rows        : 4,340 (217 ZIP codes times 10 years times 2 property groups)
 
-The data types are the types build_zip_table.py writes.
+The data types are the types ziptable_build.py writes.
 This program checked every value in the table against them before it wrote this file.
 
 A CSV (comma-separated values) file stores only text. Read the zip column as text.
 
-(script) means build_zip_table.py decides it.
+(script) means ziptable_build.py decides it.
 (source) means the value comes from a Housing Data Coalition column, named in the line.
 
 Position  Column name                          Data type  What it does
