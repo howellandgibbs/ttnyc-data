@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Building profile test</title>
+  <style>
+    :root { --ink: #1a1a1a; --muted: #5c5c5c; --bg: #fff; --subtle: #f5f5f4; --border: #d4d4d0; --accent: #1c5d99; --warn: #8a4b00; --warn-bg: #fff4e0; --bad: #a12020; }
+    @media (prefers-color-scheme: dark) {
+      :root { --ink: #f0efec; --muted: #a8a5a0; --bg: #16161a; --subtle: #222227; --border: #3a3a40; --accent: #7ab3ea; --warn: #ffcf8a; --warn-bg: #3a2a10; --bad: #ff8a8a; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 1.4rem; margin: 0 0 4px; }
+    h2 { font-size: 1rem; margin: 28px 0 8px; }
+    p.lede { color: var(--muted); margin: 0 0 20px; }
+    form, .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    input, select, button { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--ink); }
+    input { flex: 1 1 260px; }
+    select { flex: 1 1 260px; }
+    button { cursor: pointer; background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    ul.matches { list-style: none; padding: 0; margin: 8px 0 0; }
+    ul.matches button { width: 100%; text-align: left; background: var(--subtle); color: var(--ink); border-color: var(--border); margin-bottom: 4px; }
+    pre { background: var(--subtle); border: 1px solid var(--border); border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 13px; margin: 0; }
+    .status { color: var(--muted); }
+    .error { color: var(--bad); }
+    .warn { background: var(--warn-bg); color: var(--warn); border-radius: 6px; padding: 10px 12px; margin-top: 8px; }
+    .label { color: var(--muted); font-size: 0.9rem; }
+    #file-warning { border: 2px solid var(--bad); border-radius: 6px; padding: 12px 16px; }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Building profile test</h1>
+  <p class="lede">Pick a building. This page finds it the same way Tenant Triage does, then calls
+    <code>getBuildingProfile()</code> from <code>building-profile.js</code> and shows what it returns.</p>
+
+  <!-- Shown until the script below runs. If you can still see it, the page was opened as a file. -->
+  <div id="file-warning">
+    <strong>This page needs a tiny local web server.</strong> Browsers block it when you double-click the file.
+    In a terminal, in this folder, run <code>python -m http.server</code>, then open
+    <a href="http://localhost:8000/test.html">http://localhost:8000/test.html</a>.
+  </div>
+
+  <div id="app" hidden>
+    <h2>1. Find a building</h2>
+    <form id="search">
+      <input id="address" type="text" placeholder="e.g. 530 East 169 Street, Bronx" autocomplete="off">
+      <button type="submit">Search</button>
+    </form>
+    <div class="row" style="margin-top:8px">
+      <select id="validation">
+        <option value="">…or pick one of the 23 validation buildings</option>
+      </select>
+    </div>
+    <ul class="matches" id="matches"></ul>
+
+    <h2>2. What the site gives your code</h2>
+    <p class="label">This is the <code>building</code> argument your function receives.</p>
+    <pre id="input">Nothing picked yet.</pre>
+    <div id="input-notes"></div>
+
+    <h2>3. What your code returned</h2>
+    <p class="status" id="status"></p>
+    <pre id="output">Nothing yet.</pre>
+    <div id="privacy"></div>
+  </div>
+</main>
+
+<script type="module">
+  import { searchAddresses } from 'https://cdn.jsdelivr.net/npm/@howellandgibbs/hpd-lookup@1.2.0/dist/index.js';
+
+  const $ = (id) => document.getElementById(id);
+  $('file-warning').hidden = true;
+  $('app').hidden = false;
+
+  // From the "Validation buildings" tab of the project brief.
+  const VALIDATION = [
+    ['worst', '530 East 169 Street, Bronx'],
+    ['worst', '2179 Washington Avenue, Bronx'],
+    ['worst', '1593 Fulton Street, Brooklyn'],
+    ['worst', '2026 Nostrand Avenue, Brooklyn'],
+    ['worst', '41-40 Denman Street, Elmhurst'],
+    ['well-run', '405 East 56 Street, Manhattan'],
+    ['well-run', '1596 York Avenue, Manhattan'],
+    ['well-run', '113-14 72 Road, Forest Hills'],
+    ['well-run', '650 First Avenue, Manhattan'],
+    ['well-run', '1588 Third Avenue, Manhattan'],
+    ['new', '30-25 Queens Boulevard, Long Island City'],
+    ['new', '960 Franklin Avenue, Brooklyn'],
+    ['new', '303 East 44 Street, Manhattan'],
+    ['oddity', '765 Lincoln Avenue, Brooklyn'],
+    ['oddity', '20 Richman Plaza, Bronx'],
+    ['oddity', '605 West 42 Street, Manhattan'],
+    ['oddity', '1609 East 174 Street, Bronx'],
+    ['oddity', '1 Flatbush Avenue, Brooklyn'],
+    ['oddity', '1650 President Street, Brooklyn'],
+    ['oddity', '252 South Street, Manhattan'],
+    ['oddity', '280 East Houston Street, Manhattan'],
+    ['oddity', '98-09 64 Road, Rego Park'],
+    ['oddity', '2540 Barker Avenue, Bronx'],
+  ];
+  for (const [set, address] of VALIDATION) {
+    $('validation').add(new Option(`${address} (${set})`, address));
+  }
+
+  async function search(address) {
+    $('matches').replaceChildren();
+    $('status').textContent = 'Searching…';
+    $('status').className = 'status';
+    try {
+      const matches = await searchAddresses(address);
+      $('status').textContent = matches.length ? '' : 'No building matched that address.';
+      return matches;
+    } catch (err) {
+      showError('Address search failed', err);
+      return [];
+    }
+  }
+
+  function showMatches(matches) {
+    for (const building of matches) {
+      const li = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = `${building.displayLabel}  ·  BBL ${building.bbl}  ·  BIN ${building.bin ?? 'none'}`;
+      button.addEventListener('click', () => run(building));
+      li.append(button);
+      $('matches').append(li);
+    }
+  }
+
+  $('search').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const address = $('address').value.trim();
+    if (address) showMatches(await search(address));
+  });
+
+  // Validation buildings skip the list and use the best match, like a user
+  // picking the first autocomplete suggestion.
+  $('validation').addEventListener('change', async () => {
+    const address = $('validation').value;
+    if (!address) return;
+    $('address').value = address;
+    const [best] = await search(address);
+    if (best) run(best);
+  });
+
+  async function run(building) {
+    $('matches').replaceChildren();
+    $('input').textContent = JSON.stringify(building, null, 2);
+    $('input-notes').replaceChildren(...notesFor(building));
+    $('output').textContent = '…';
+    $('privacy').replaceChildren();
+    $('status').className = 'status';
+    $('status').textContent = 'Running getBuildingProfile()…';
+
+    // Re-import on every run, so edits to building-profile.js show up
+    // without reloading the page.
+    let getBuildingProfile;
+    try {
+      ({ getBuildingProfile } = await import(`./building-profile.js?v=${Date.now()}`));
+    } catch (err) {
+      return showError('Could not load building-profile.js (check it for a syntax error)', err);
+    }
+
+    const started = performance.now();
+    try {
+      const profile = await getBuildingProfile(building);
+      const seconds = ((performance.now() - started) / 1000).toFixed(1);
+      const json = JSON.stringify(profile, null, 2);
+      $('output').textContent = json;
+      $('status').textContent = `Done in ${seconds}s · ${(json.length / 1024).toFixed(1)} KB`;
+      $('privacy').replaceChildren(...privacyWarnings(profile));
+    } catch (err) {
+      showError('getBuildingProfile() threw an error', err);
+    }
+  }
+
+  function showError(what, err) {
+    $('status').className = 'status error';
+    $('status').textContent = `${what}: ${err?.message ?? err}`;
+    console.error(err);
+  }
+
+  function warning(text) {
+    const div = document.createElement('div');
+    div.className = 'warn';
+    div.textContent = text;
+    return div;
+  }
+
+  // The data traps from the brief that show up in the input itself.
+  function notesFor(building) {
+    const notes = [];
+    if (!building.bin) notes.push(warning('No BIN for this address. DOB and ECB data are keyed by BIN, so your code has to cope without one.'));
+    else if (/^[1-5]000000$/.test(building.bin)) notes.push(warning(`BIN ${building.bin} is a placeholder ("million BIN"). Never query DOB or ECB data with it; it returns other buildings' records.`));
+    if (/^\d{6}75\d{2}$/.test(building.bbl)) notes.push(warning('Lot 75xx is a condo billing lot. The brief treats it as the building.'));
+    if (!building.postalCode) notes.push(warning('No ZIP code for this match. The Housing Court ZIP figure will not apply.'));
+    return notes;
+  }
+
+  // A rough, mechanical check for things the brief says must never be output.
+  // It cannot prove the output is safe; it catches the obvious mistakes.
+  function privacyWarnings(profile) {
+    const found = new Set();
+    const risky = /apart|^apt|_apt|index_?num|docket|first_?name|last_?name|respondent|latitude|longitude/i;
+    (function walk(value, path) {
+      if (Array.isArray(value)) {
+        if (value.length > 0 && typeof value[0] === 'object') found.add(`${path} is a list of records. Return counts or other derived values, not raw rows.`);
+        value.forEach((item, i) => walk(item, `${path}[${i}]`));
+      } else if (value && typeof value === 'object') {
+        for (const [key, child] of Object.entries(value)) {
+          if (risky.test(key)) found.add(`Field "${key}" (at ${path}) looks like personal or unit-level data.`);
+          walk(child, `${path}.${key}`);
+        }
+      }
+    })(profile, 'profile');
+    return [...found].map((text) => warning('Privacy check: ' + text));
+  }
+</script>
+</body>
+</html>
