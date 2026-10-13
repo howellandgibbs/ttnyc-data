@@ -1,0 +1,60 @@
+DOI Eviction TABLE SPECIFICATION
+
+Table                 : Evictions
+Dataset identifier    : 6z8x-wfk4
+Source                : New York City Open Data, https://data.cityofnewyork.us/api/views/6z8x-wfk4.json
+Created               : 2026-10-12 18:17
+Number of columns     : 20
+
+The data types are the types the source declares.
+
+They were not guessed from values.
+
+No rows were downloaded for this file.
+
+(master guide) means the master guide says it. (inferred) means it is a guess from the column name and is not checked.
+
+Position  Column name                 Data type      What it does
+---------------------------------------------------------------------------------------------------------------------------
+1         court_index_number          text           Number assigned by the court that has jurisdiction over the
+                                                     landlord/tenant proceedings. (source)
+2         docket_number               text           Number assigned by the City Marshal upon case intake. (source)
+3         eviction_address            text           Identifies the street and building number where an eviction is pending
+                                                     or has been completed. (source)
+4         eviction_apt_num            text           Identifies the unit within the building where an eviction is pending
+                                                     or has been completed. (source)
+5         executed_date               calendar_date  The date that evictions have been executed. (source)
+6         marshal_first_name          text           Identifies the first name of the NYC Marshal who performed the
+                                                     eviction or who is scheduled to perform the eviction. (source)
+7         marshal_last_name           text           Identifies the last name of the NYC Marshal who performed the eviction
+                                                     or who is scheduled to perform the eviction. (source)
+8         residential_commercial_ind  text           Identifies the property type where the eviction is pending or has been
+                                                     completed. (source)
+9         borough                     text           Identifies the NYC borough where the eviction is pending or has been
+                                                     completed. (source)
+10        eviction_zip                text           Identifies the NYC zip code where the eviction is pending or has been
+                                                     completed. (source)
+11        ejectment                   text           An action in ejectment is a way for a landlord to obtain possession of
+                                                     a residence and may be started in either Civil or Supreme Court.
+                                                     (source)
+12        eviction_possession         text           Process by which a warrant of eviction is executed.  Landlord may
+                                                     request an eviction whereby the tenant and his/her property are
+                                                     removed by a marshal, or a legal possession whereby the tenant is
+                                                     removed and his/her property remains under the care and control of the
+                                                     landlord as bailee for the tenant. (source)
+13        latitude                    text           The latitude associated with the provided entity location. (source)
+14        longitude                   text           The longitude associated with the provided entity location. (source)
+15        community_board             text           The NYC community board associated with the provided entity location.
+                                                     (source)
+16        council_district            text           The NYC council district associated with the provided entity location.
+                                                     (source)
+17        census_tract                text           The US census tract associated with the provided entity location.
+                                                     (source)
+18        bin                         text           The Building Identification Number (BIN) associated with the provided
+                                                     entity location. It is formatted as a seven-digit numerical
+                                                     identifier, which is unique to each building in NYC. (source)
+19        bbl                         text           The Borough, Block, Lot (BBL) associated with the provided entity
+                                                     location. It is formatted as a ten-digit numerical identifier, which
+                                                     is unique to each parcel of real property in NYC. (source)
+20        nta                         text           The Neighborhood Tabulation Area (NTA) associated with the provided
+                                                     entity location. (source)
