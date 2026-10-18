@@ -67,6 +67,62 @@ async function evictions(building) {
   return { source: '6z8x-wfk4', residentialTotal: total, residentialByYear: byYear };
 }
 
+/**
+ * HPD housing maintenance code violations (wvxf-dwi5): totals, open counts,
+ * open counts by class, open rent-impairing count, and the latest inspection.
+ *
+ * The building is matched on the dataset's own `bbl` column, as text. Do not
+ * match on the separate boroid, block, and lot columns: for 765 Lincoln Avenue
+ * that returns no rows, even though the `bbl` column shows 5,082 open
+ * violations. About 10,600 violation rows in the whole table have no `bbl`
+ * value, and this function cannot count those.
+ *
+ * Class A is the least serious, B is serious, C is the most serious. Class I
+ * is an informational order. rentimpairing is 'Y' or 'N'.
+ */
+async function hpdViolations(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so violations cannot be looked up');
+  }
+
+  // Socrata does the counting. One row comes back for each combination of
+  // status, class, and rent-impairing flag, so only a few rows return.
+  const rows = await socrata('wvxf-dwi5', {
+    $select: 'violationstatus, class, rentimpairing, count(*) AS violations, max(inspectiondate) AS latest',
+    $where: `bbl='${building.bbl}'`,
+    $group: 'violationstatus, class, rentimpairing',
+  });
+
+  let total = 0;
+  let open = 0;
+  let openRentImpairing = 0;
+  const openByClass = {};
+  let latestInspectionDate = null;
+
+  for (const row of rows) {
+    const count = Number(row.violations);
+    total += count;
+    if (row.latest && (!latestInspectionDate || row.latest > latestInspectionDate)) {
+      latestInspectionDate = row.latest;
+    }
+    if (row.violationstatus === 'Open') {
+      open += count;
+      openByClass[row.class] = (openByClass[row.class] ?? 0) + count;
+      if (row.rentimpairing === 'Y') openRentImpairing += count;
+    }
+  }
+
+  return {
+    source: 'wvxf-dwi5',
+    total,
+    open,
+    closed: total - open,
+    openByClass,
+    openRentImpairing,
+    latestInspectionDate: latestInspectionDate ? latestInspectionDate.slice(0, 10) : null,
+  };
+}
+
 // TODO: add the other datasets from the brief, one function each, e.g.
 //   async function hpdViolations(building) { ... }
 //   async function dobViolations(building) { ... }
@@ -74,6 +130,7 @@ async function evictions(building) {
 
 const DATASETS = {
   evictions,
+  hpdViolations,
 };
 
 // ---------------------------------------------------------------------------
