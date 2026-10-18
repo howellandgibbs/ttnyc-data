@@ -237,6 +237,74 @@ async function hpdLitigation(building) {
   };
 }
 
+/**
+ * Decides whether a building number (BIN) can be used to look up Department of
+ * Buildings data. A missing BIN, or a placeholder BIN that ends in 000000,
+ * returns other buildings' records, so those lookups are skipped.
+ * Returns null when the BIN is usable, or a short note saying why not.
+ */
+function binProblem(building) {
+  if (!building.bin) return 'This address has no building number (BIN), so Department of Buildings data was not looked up.';
+  if (!/^\d{7}$/.test(building.bin)) return 'The building number (BIN) is not 7 digits, so Department of Buildings data was not looked up.';
+  if (/000000$/.test(building.bin)) return 'The building number (BIN) is a placeholder that ends in 000000, so Department of Buildings data was not looked up.';
+  return null;
+}
+
+/** The source writes dates as YYYYMMDD. This turns one into YYYY-MM-DD. */
+function formatCompactDate(text) {
+  return /^\d{8}$/.test(text ?? '') ? `${text.slice(0, 4)}-${text.slice(4, 6)}-${text.slice(6, 8)}` : null;
+}
+
+/**
+ * Department of Buildings violations (3h2n-5cm9): the older civil penalties
+ * that the Department of Buildings recorded. The newer civil penalties are in
+ * a different dataset, DOB Safety Violations, which this function does not
+ * read. Summonses judged by the Environmental Control Board are in the next
+ * function.
+ *
+ * Returns the number of violations, the number still active, how many of the
+ * active ones are hazardous, and the latest issue date.
+ *
+ * The building is matched on the building number (BIN), which this dataset
+ * holds as text. A violation is active when its category ends with the word
+ * ACTIVE. One category with the text "V%-DOB VIOLATION" (about 1,000 rows in
+ * the whole table) does not say active or dismissed and is not counted as
+ * active. Hazardous means the category starts with VH or VWH.
+ */
+async function dobViolations(building) {
+  const problem = binProblem(building);
+  if (problem) return { source: '3h2n-5cm9', skipped: true, note: problem };
+
+  const rows = await socrata('3h2n-5cm9', {
+    $select: 'violation_category, count(*) AS violations, max(issue_date) AS latest',
+    $where: `bin='${building.bin}'`,
+    $group: 'violation_category',
+  });
+
+  let total = 0;
+  let active = 0;
+  let activeHazardous = 0;
+  let latest = null;
+  for (const row of rows) {
+    const count = Number(row.violations);
+    const category = row.violation_category ?? '';
+    total += count;
+    if (row.latest && (!latest || row.latest > latest)) latest = row.latest;
+    if (category.endsWith('ACTIVE')) {
+      active += count;
+      if (category.startsWith('VH') || category.startsWith('VWH')) activeHazardous += count;
+    }
+  }
+
+  return {
+    source: '3h2n-5cm9',
+    totalViolations: total,
+    activeViolations: active,
+    activeHazardousViolations: activeHazardous,
+    latestIssueDate: formatCompactDate(latest),
+  };
+}
+
 // TODO: add the other datasets from the brief, one function each, e.g.
 //   async function hpdViolations(building) { ... }
 //   async function dobViolations(building) { ... }
@@ -247,6 +315,7 @@ const DATASETS = {
   hpdViolations,
   hpdComplaints,
   hpdLitigation,
+  dobViolations,
 };
 
 // ---------------------------------------------------------------------------
