@@ -305,6 +305,51 @@ async function dobViolations(building) {
   };
 }
 
+/**
+ * Department of Buildings summonses judged by the Environmental Control Board
+ * (6bgk-3dad): the number of summonses, the number still active, the active
+ * ones by severity, and the latest issue date.
+ *
+ * The building is matched on the building number (BIN), held as text. A
+ * summons is active when its status is ACTIVE. The source also uses RESOLVE
+ * and, for 3 rows in the whole table, Unknown. The respondent name, the
+ * penalty, and the dollar amounts are never returned. The source does not
+ * define the money columns, so no dollar figure is returned.
+ */
+async function ecbViolations(building) {
+  const problem = binProblem(building);
+  if (problem) return { source: '6bgk-3dad', skipped: true, note: problem };
+
+  const rows = await socrata('6bgk-3dad', {
+    $select: 'ecb_violation_status, severity, count(*) AS summonses, max(issue_date) AS latest',
+    $where: `bin='${building.bin}'`,
+    $group: 'ecb_violation_status, severity',
+  });
+
+  let total = 0;
+  let active = 0;
+  const activeBySeverity = {};
+  let latest = null;
+  for (const row of rows) {
+    const count = Number(row.summonses);
+    total += count;
+    if (row.latest && (!latest || row.latest > latest)) latest = row.latest;
+    if (row.ecb_violation_status === 'ACTIVE') {
+      active += count;
+      const severity = row.severity ?? 'Not stated';
+      activeBySeverity[severity] = (activeBySeverity[severity] ?? 0) + count;
+    }
+  }
+
+  return {
+    source: '6bgk-3dad',
+    totalSummonses: total,
+    activeSummonses: active,
+    activeBySeverity,
+    latestIssueDate: formatCompactDate(latest),
+  };
+}
+
 // TODO: add the other datasets from the brief, one function each, e.g.
 //   async function hpdViolations(building) { ... }
 //   async function dobViolations(building) { ... }
@@ -316,6 +361,7 @@ const DATASETS = {
   hpdComplaints,
   hpdLitigation,
   dobViolations,
+  ecbViolations,
 };
 
 // ---------------------------------------------------------------------------
