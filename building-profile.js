@@ -31,19 +31,38 @@
 
 const SOCRATA = 'https://data.cityofnewyork.us/resource/';
 
-// Optional. A Socrata app token raises the rate limit. Leave it empty while
-// testing; the site will pass its own.
-const APP_TOKEN = '';
+// Settings shared by every request. Leave them alone while testing; the site
+// sets its own once, with configure().
+//   appToken:  a Socrata app token, which raises the rate limit. Optional.
+//   timeoutMs: how long to wait for one answer before giving up on that
+//              dataset. NYC Open Data is sometimes very slow, and without a
+//              limit one slow answer holds up the whole profile.
+const settings = { appToken: '', timeoutMs: 20000 };
+
+/** Change the shared settings, e.g. configure({ appToken: '…' }). */
+export function configure(options = {}) {
+  Object.assign(settings, options);
+}
 
 /**
  * Ask NYC Open Data a question and get the answer back as a list of objects.
  * `params` are SoQL query parameters, e.g. { $where: "bbl='2026100012'" }.
+ * Stops waiting after settings.timeoutMs; that dataset then reports an error
+ * and the others still come back.
  */
 async function socrata(datasetId, params) {
   const url = new URL(SOCRATA + datasetId + '.json');
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
-  const headers = APP_TOKEN ? { 'X-App-Token': APP_TOKEN } : {};
-  const response = await fetch(url, { headers });
+  const headers = settings.appToken ? { 'X-App-Token': settings.appToken } : {};
+  let response;
+  try {
+    response = await fetch(url, { headers, signal: AbortSignal.timeout(settings.timeoutMs) });
+  } catch (err) {
+    if (err.name === 'TimeoutError') {
+      throw new Error(`${datasetId} did not answer within ${settings.timeoutMs / 1000} seconds`);
+    }
+    throw err;
+  }
   if (!response.ok) throw new Error(`${datasetId} answered ${response.status}`);
   return response.json();
 }
@@ -238,16 +257,41 @@ async function hpdLitigation(building) {
 }
 
 /**
- * Decides whether a building number (BIN) can be used to look up Department of
- * Buildings data. A missing BIN, or a placeholder BIN that ends in 000000,
- * returns other buildings' records, so those lookups are skipped.
+ * Decides whether one building number (BIN) can be used to look up Department
+ * of Buildings data. A missing BIN, a BIN that is not 7 digits, or a
+ * placeholder BIN that ends in 000000 would return other buildings' records,
+ * so it is not used.
  * Returns null when the BIN is usable, or a short note saying why not.
  */
-function binProblem(building) {
-  if (!building.bin) return 'This address has no building number (BIN), so Department of Buildings data was not looked up.';
-  if (!/^\d{7}$/.test(building.bin)) return 'The building number (BIN) is not 7 digits, so Department of Buildings data was not looked up.';
-  if (/000000$/.test(building.bin)) return 'The building number (BIN) is a placeholder that ends in 000000, so Department of Buildings data was not looked up.';
+function binProblem(bin) {
+  if (!bin) return 'The building number (BIN) is missing.';
+  if (!/^\d{7}$/.test(bin)) return 'The building number (BIN) is not 7 digits.';
+  if (/000000$/.test(bin)) return 'The building number (BIN) is a placeholder that ends in 000000.';
   return null;
+}
+
+/**
+ * Lists the usable building numbers (BINs) of every building on the building's
+ * tax lot (the Borough, Block, and Lot, called bbl here).
+ *
+ * NYC Building Footprints (5zhs-2jue) returns the BIN of every building on the
+ * lot. The BIN that the address search returned (building.bin) is added to
+ * that list. Every BIN that binProblem() rejects is removed, and each BIN is
+ * listed once. The list can be empty.
+ */
+async function binsOnLot(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so the buildings on the lot cannot be listed');
+  }
+
+  const rows = await socrata('5zhs-2jue', {
+    $select: 'bin',
+    $where: `mappluto_bbl='${building.bbl}' OR base_bbl='${building.bbl}'`,
+  });
+
+  const candidateBins = [building.bin, ...rows.map((row) => row.bin)];
+  const usableBins = candidateBins.filter((bin) => binProblem(bin) === null);
+  return [...new Set(usableBins)];
 }
 
 /** The source writes dates as YYYYMMDD. This turns one into YYYY-MM-DD. */
@@ -262,22 +306,38 @@ function formatCompactDate(text) {
  * read. Summonses judged by the Environmental Control Board are in the next
  * function.
  *
- * Returns the number of violations, the number still active, how many of the
- * active ones are hazardous, and the latest issue date.
+ * Returns the number of buildings on the lot, the number of violations, the
+ * number still active, how many of the active ones are hazardous, and the
+ * latest issue date.
  *
- * The building is matched on the building number (BIN), which this dataset
- * holds as text. A violation is active when its category ends with the word
- * ACTIVE. One category with the text "V%-DOB VIOLATION" (about 1,000 rows in
- * the whole table) does not say active or dismissed and is not counted as
- * active. Hazardous means the category starts with VH or VWH.
+ * A violation is counted when its building number (BIN) is in the list of
+ * BINs on the lot, or when the row itself is on the building's lot. This
+ * dataset holds the borough as one digit, the block as 5 digits, and the lot
+ * as 5 digits. A placeholder BIN is never used in the query. If the list of
+ * BINs is empty, only the lot is used.
+ *
+ * A violation is active when its category ends with the word ACTIVE. One
+ * category with the text "V%-DOB VIOLATION" (about 1,000 rows in the whole
+ * table) does not say active or dismissed and is not counted as active.
+ * Hazardous means the category starts with VH or VWH.
  */
 async function dobViolations(building) {
-  const problem = binProblem(building);
-  if (problem) return { source: '3h2n-5cm9', skipped: true, note: problem };
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so violations cannot be looked up');
+  }
+
+  const bins = await binsOnLot(building);
+
+  const borough = building.bbl.slice(0, 1);
+  const block = building.bbl.slice(1, 6);
+  const lot = '0' + building.bbl.slice(6, 10);
+  const onLot = `(boro='${borough}' AND block='${block}' AND lot='${lot}')`;
+  const binList = bins.map((bin) => `'${bin}'`).join(',');
+  const where = bins.length > 0 ? `(bin in (${binList}) OR ${onLot})` : onLot;
 
   const rows = await socrata('3h2n-5cm9', {
     $select: 'violation_category, count(*) AS violations, max(issue_date) AS latest',
-    $where: `bin='${building.bin}'`,
+    $where: where,
     $group: 'violation_category',
   });
 
@@ -298,6 +358,7 @@ async function dobViolations(building) {
 
   return {
     source: '3h2n-5cm9',
+    buildingsOnLot: bins.length,
     totalViolations: total,
     activeViolations: active,
     activeHazardousViolations: activeHazardous,
@@ -351,8 +412,7 @@ async function ecbViolations(building) {
 }
 
 // TODO: add the other datasets from the brief, one function each, e.g.
-//   async function hpdViolations(building) { ... }
-//   async function dobViolations(building) { ... }
+//   async function ecbViolations(building) { ... }
 // then list them in DATASETS below.
 
 const DATASETS = {
