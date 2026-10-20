@@ -31,19 +31,38 @@
 
 const SOCRATA = 'https://data.cityofnewyork.us/resource/';
 
-// Optional. A Socrata app token raises the rate limit. Leave it empty while
-// testing; the site will pass its own.
-const APP_TOKEN = '';
+// Settings shared by every request. Leave them alone while testing; the site
+// sets its own once, with configure().
+//   appToken:  a Socrata app token, which raises the rate limit. Optional.
+//   timeoutMs: how long to wait for one answer before giving up on that
+//              dataset. NYC Open Data is sometimes very slow, and without a
+//              limit one slow answer holds up the whole profile.
+const settings = { appToken: '', timeoutMs: 20000 };
+
+/** Change the shared settings, e.g. configure({ appToken: '…' }). */
+export function configure(options = {}) {
+  Object.assign(settings, options);
+}
 
 /**
  * Ask NYC Open Data a question and get the answer back as a list of objects.
  * `params` are SoQL query parameters, e.g. { $where: "bbl='2026100012'" }.
+ * Stops waiting after settings.timeoutMs; that dataset then reports an error
+ * and the others still come back.
  */
 async function socrata(datasetId, params) {
   const url = new URL(SOCRATA + datasetId + '.json');
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
-  const headers = APP_TOKEN ? { 'X-App-Token': APP_TOKEN } : {};
-  const response = await fetch(url, { headers });
+  const headers = settings.appToken ? { 'X-App-Token': settings.appToken } : {};
+  let response;
+  try {
+    response = await fetch(url, { headers, signal: AbortSignal.timeout(settings.timeoutMs) });
+  } catch (err) {
+    if (err.name === 'TimeoutError') {
+      throw new Error(`${datasetId} did not answer within ${settings.timeoutMs / 1000} seconds`);
+    }
+    throw err;
+  }
   if (!response.ok) throw new Error(`${datasetId} answered ${response.status}`);
   return response.json();
 }
