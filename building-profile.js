@@ -123,6 +123,60 @@ async function hpdViolations(building) {
   };
 }
 
+/**
+ * HPD housing maintenance code complaints (ygpa-z7cr): the number of separate
+ * complaints, how many are still open, the number received in each year, and
+ * the date of the latest complaint.
+ *
+ * Each row in this table is one problem inside a complaint, and one complaint
+ * can hold several problems. So this function counts the distinct complaint
+ * identifiers, not rows. A complaint has one status and one received date, so
+ * the counts can be added across groups.
+ *
+ * The building is matched on the dataset's `bbl` column. About 37,400 of the
+ * 16.4 million rows in the whole table have no `bbl`, and this function cannot
+ * count those. Apartment numbers and the anonymous-complaint flag are never
+ * returned.
+ */
+async function hpdComplaints(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so complaints cannot be looked up');
+  }
+
+  // Two questions, asked at the same time. Socrata does the counting.
+  const [groups, latest] = await Promise.all([
+    socrata('ygpa-z7cr', {
+      $select: 'date_extract_y(received_date) AS year, complaint_status, count(distinct complaint_id) AS complaints',
+      $where: `bbl=${building.bbl}`,
+      $group: 'year, complaint_status',
+      $order: 'year',
+    }),
+    socrata('ygpa-z7cr', {
+      $select: 'max(received_date) AS latest',
+      $where: `bbl=${building.bbl}`,
+    }),
+  ]);
+
+  let total = 0;
+  let open = 0;
+  const byYear = {};
+  for (const row of groups) {
+    const count = Number(row.complaints);
+    total += count;
+    byYear[row.year] = (byYear[row.year] ?? 0) + count;
+    if (row.complaint_status === 'OPEN') open += count;
+  }
+
+  const latestDate = latest[0]?.latest ?? null;
+  return {
+    source: 'ygpa-z7cr',
+    totalComplaints: total,
+    openComplaints: open,
+    complaintsByYear: byYear,
+    latestComplaintDate: latestDate ? latestDate.slice(0, 10) : null,
+  };
+}
+
 // TODO: add the other datasets from the brief, one function each, e.g.
 //   async function hpdViolations(building) { ... }
 //   async function dobViolations(building) { ... }
@@ -131,6 +185,7 @@ async function hpdViolations(building) {
 const DATASETS = {
   evictions,
   hpdViolations,
+  hpdComplaints,
 };
 
 // ---------------------------------------------------------------------------
