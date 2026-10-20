@@ -1,0 +1,269 @@
+COLUMN PROFILE OF THE HOUSING COURT TABLES
+
+== oca_index.csv
+Rows read: 2,366,542. Columns: 12.
+Rows with the wrong number of values: 0.
+
+1. indexnumberid
+   Guessed type: code
+   Blank values: 0 (0.0%). Filled values: 2,366,542.
+   Different values: more than 1,000
+   Shortest value: 64 characters. Longest value: 64 characters.
+
+2. court
+   Guessed type: text
+   Blank values: 0 (0.0%). Filled values: 2,366,542.
+   Different values: 76
+   Shortest value: 14 characters. Longest value: 44 characters.
+   Most common values (among the first 1,000 different values seen):
+          611,230  Bronx County Civil Court
+          472,748  Kings County Civil Court
+          319,463  New York County Civil Court
+          274,058  Queens County Civil Court
+           80,767  Buffalo City Court
+           65,321  Rochester City Court
+           51,182  Nassau County District Court - 1st Distr
+           45,812  Yonkers City Court
+           38,364  Richmond County Civil Court
+           35,697  Syracuse City Court
+   First values seen: Bronx County Civil Court | Yonkers City Court | Suffolk County District Court - 5th Dist
+
+3. fileddate
+   Guessed type: date
+   Blank values: 0 (0.0%). Filled values: 2,366,542.
+   Different values: more than 1,000
+   Shortest value: 10 characters. Longest value: 10 characters.
+   Most common values (among the first 1,000 different values seen):
+            2,762  2016-02-16
+            2,694  2018-02-13
+            2,398  2016-02-11
+            2,364  2018-08-13
+            2,214  2016-10-11
+            2,167  2016-11-09
+            2,145  2016-11-10
+            2,114  2016-01-11
+            2,075  2016-01-15
+            2,059  2019-01-10
+   First values seen: 2016-04-12 | 2016-02-22 | 2016-06-02
+
+4. propertytype
+   Guessed type: text
+   Blank values: 355,807 (15.0%). Filled values: 2,010,735.
+   Different values: 2
+   Shortest value: 10 characters. Longest value: 11 characters.
+   All values, most common first:
+        1,930,979  Residential
+           79,756  Commercial
+   First values seen: Residential | Residential | Residential
+
+5. classification
+   Guessed type: text
+   Blank values: 0 (0.0%). Filled values: 2,366,542.
+   Different values: 11
+   Shortest value: 2 characters. Longest value: 33 characters.
+   All values, most common first:
+        1,857,837  Non-Payment
+          365,335  Holdover
+          102,273  HP
+           20,701  Illegal Lockout
+           11,321  HP with Harassment
+            7,523  Harassment
+              625  Article 7D
+              493  Illegal Activity
+              265  Breach of Warrant of Habitability
+              158  Article 7A
+               11  Article 7C
+   First values seen: Non-Payment | Non-Payment | Non-Payment
+
+6. specialtydesignationtypes
+   Guessed type: bracketed list
+   Blank values: 1,011,379 (42.7%). Filled values: 1,355,163.
+   Different values: more than 1,000
+   Shortest value: 4 characters. Longest value: 337 characters.
+   Most common values (among the first 1,000 different values seen):
+          345,052  {E-Filed}
+          201,021  {"Consumer Debt",E-Filed}
+          152,081  {"Consumer Debt"}
+          146,879  {NYCHA}
+           24,935  {HPD}
+           24,573  {"Tenant Initiated"}
+           21,918  {"10452 - Specialty Zipcode"}
+           21,323  {"10457 - Specialty Zipcode"}
+           20,754  {"10456 - Specialty Zipcode"}
+           20,591  {E-Filed,"Tenant Initiated"}
+   First values seen: {"10467 - Specialty ZipCode"} | {NYCHA} | {NYCHA}
+
+7. status
+   Guessed type: text
+   Blank values: 0 (0.0%). Filled values: 2,366,542.
+   Different values: 9
+   Shortest value: 6 characters. Longest value: 34 characters.
+   All values, most common first:
+        1,731,675  Disposed
+          420,450  Post Disposition
+          185,658  Active
+           23,310  Active - Pending Further Review
+            3,721  Post Disposition - Appeal Pending
+            1,196  Disposed - Appeal Pending
+              400  Active - Appeal Pending
+              129  Active - Restored
+                3  Active - Restored - Appeal Pending
+   First values seen: Post Disposition | Disposed | Disposed
+
+8. disposeddate
+   Guessed type: date
+   Blank values: 209,500 (8.9%). Filled values: 2,157,042.
+   Different values: more than 1,000
+   Shortest value: 10 characters. Longest value: 10 characters.
+   Most common values (among the first 1,000 different values seen):
+          121,712  2023-02-23
+           75,485  2019-10-23
+           67,124  2018-07-13
+           30,596  2024-06-10
+            1,626  2017-07-06
+            1,594  2016-10-06
+            1,577  2017-02-08
+            1,563  2017-03-08
+            1,547  2017-01-11
+            1,543  2018-02-01
+   First values seen: 2016-04-26 | 2016-02-29 | 2016-06-16
+
+9. disposedreason
+   Guessed type: text
+   Blank values: 209,500 (8.9%). Filled values: 2,157,042.
+   Different values: more than 1,000
+   Shortest value: 7 characters. Longest value: 155 characters.
+   Most common values (among the first 1,000 different values seen):
+          291,995  Miscellaneous
+          248,979  Settled Stip in File
+          220,954  Discontinued
+          186,590  Judgment(1)-Stipulation of Parties
+          153,777  Withdrawn
+          130,838  Notice of Discontinuance - Index Dispose
+          110,658  Judgment with Possession, with Warrant, 
+           71,994  Judgment(1)-Inquest
+           58,097  Judgment(1)-Hearing
+           56,196  Dismissed
+   First values seen: Judgment with Possession, with Warrant,  | Judgment with Possession, with Warrant,  | Dismissed NAES
+
+10. firstpaper
+   Guessed type: text
+   Blank values: 0 (0.0%). Filled values: 2,366,542.
+   Different values: 11
+   Shortest value: 13 characters. Longest value: 43 characters.
+   All values, most common first:
+        2,089,372  Petition by Attorney
+          122,770  Petition by Self Represented Landlord
+          115,145  Predicate OSC
+           21,491  Petition by Attorney Issued by Clerk
+           10,002  Petition by Self Represented Landlord - 
+            3,515  Tenant Initiated
+            2,694  Commenced by OSC
+              877  Tenant Initiated - DIY
+              449  Commenced by Motion
+              192  Transfer From Another Court
+               35  Transfer From Civil Court
+   First values seen: Petition by Attorney | Petition by Attorney | Petition by Self Represented Landlord
+
+11. primaryclaimtotal
+   Guessed type: decimal number
+   Blank values: 431 (0.0%). Filled values: 2,366,111.
+   Different values: more than 1,000
+   Shortest value: 5 characters. Longest value: 14 characters.
+   Most common values (among the first 1,000 different values seen):
+          586,024  0.000
+            3,578  3000.000
+            2,997  2400.000
+            2,893  1500.000
+            2,789  1200.000
+            2,686  1800.000
+            2,653  2000.000
+            2,625  3600.000
+            2,438  1000.000
+            2,417  6000.000
+   First values seen: 5123.630 | 1482.720 | 0.000
+
+12. dateofjurydemand
+   Guessed type: date
+   Blank values: 2,365,627 (100.0%). Filled values: 915.
+   Different values: 707
+   Shortest value: 10 characters. Longest value: 10 characters.
+   Most common values (among the first 1,000 different values seen):
+                6  2017-06-06
+                4  2016-03-08
+                4  2017-11-22
+                4  2025-11-13
+                4  2019-03-13
+                4  2025-05-29
+                4  2023-04-12
+                4  2024-04-01
+                3  2016-05-20
+                3  2016-09-20
+   First values seen: 2016-10-04 | 2016-03-25 | 2022-09-27
+
+== oca_addresses.csv
+Rows read: 2,367,109. Columns: 4.
+Rows with the wrong number of values: 0.
+
+1. indexnumberid
+   Guessed type: code
+   Blank values: 0 (0.0%). Filled values: 2,367,109.
+   Different values: more than 1,000
+   Shortest value: 64 characters. Longest value: 64 characters.
+
+2. city
+   Guessed type: mixed
+   Blank values: 0 (0.0%). Filled values: 2,367,109.
+   Different values: more than 1,000
+   Shortest value: 2 characters. Longest value: 44 characters.
+   Values looked like: text: 2,367,101, code: 8
+   Most common values (among the first 1,000 different values seen):
+          611,577  Bronx
+          477,675  Brooklyn
+          346,177  New York
+           69,602  Buffalo
+           65,312  Rochester
+           45,030  Yonkers
+           40,735  Jamaica
+           38,343  Staten Island
+           35,690  Syracuse
+           34,712  Albany
+   First values seen: Niagara Falls | Buffalo | Troy
+
+3. state
+   Guessed type: text
+   Blank values: 0 (0.0%). Filled values: 2,367,109.
+   Different values: 28
+   Shortest value: 4 characters. Longest value: 37 characters.
+   Most common values (among the first 1,000 different values seen):
+        2,366,967  New York
+               52  Alabama
+               12  Pennsylvania
+               12  Nevada
+                9  Virginia
+                6  New Jersey
+                6  Utah
+                5  Florida
+                4  Ohio
+                4  Alaska
+   First values seen: New York | New York | New York
+
+4. postalcode
+   Guessed type: mixed
+   Blank values: 0 (0.0%). Filled values: 2,367,109.
+   Different values: more than 1,000
+   Shortest value: 5 characters. Longest value: 10 characters.
+   Values looked like: whole number: 2,260,198, text: 106,911
+   Most common values (among the first 1,000 different values seen):
+           50,953  10456
+           50,150  10453
+           44,998  10467
+           44,698  10452
+           44,638  10457
+           41,317  10458
+           39,862  11226
+           39,856  10468
+           37,410  11212
+           32,341  10460
+   First values seen: 14301 | 14215 | 12180
+
