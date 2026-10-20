@@ -5,7 +5,7 @@ This repository holds the data work for Tenant Triage NYC. It uses public New Yo
 ## What the project produces
 
 - **ZIP code table.** For each ZIP code and each year from 2016 to 2025, the number of Housing Court cases. The counts are split by case type and by property group (residential only, and residential plus commercial).
-- **Building information.** This is not built in this repository. The website looks up each building when a visitor searches an address.
+- **Building information.** This is not built in this repository. The website looks up each building when a visitor searches an address. The lookup code is in `building-profile.js`, and `test.html` is a local test page for it.
 - Housing Court counts describe a neighborhood. They are never facts about one building.
 
 ## Files in this repository
@@ -13,8 +13,8 @@ This repository holds the data work for Tenant Triage NYC. It uses public New Yo
 ### ZIP code table
 
 - `ziptable_build.py` builds the ZIP code table. It reads the Housing Court files shared by the Housing Data Coalition and the list of ZIP codes from the New York City Department of City Planning.
-- `zip_housing_court.csv` is the ZIP code table. It has 4,340 rows: 217 ZIP codes, 10 years, and 2 property groups.
-- `zip_housing_court_run.json` records the counts from the build, including how many cases were left out and why.
+- `ziptable.csv` is the ZIP code table. It has 4,340 rows: 217 ZIP codes, 10 years, and 2 property groups.
+- `ziptable_run.json` records the counts from the build, including how many cases were left out and why.
 - `ziptable_column_profile.py` reads the table and writes a plain-text description of every column.
 
 ### Housing Court exploration scripts
