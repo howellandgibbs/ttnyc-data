@@ -177,6 +177,66 @@ async function hpdComplaints(building) {
   };
 }
 
+/**
+ * HPD housing litigation (59kj-x8nc): Housing Court cases that the city's
+ * Housing Litigation Division filed against owners of this building.
+ *
+ * Returns the number of cases, the number still pending, the number of cases
+ * by case type, the number of cases with a finding of harassment, and the date
+ * the latest case was opened.
+ *
+ * A case is pending when its status is PENDING or APPLICATION PENDING. Almost
+ * all other cases are CLOSED. A few old cases (2006 and earlier) have other
+ * status text, and they count as not pending.
+ *
+ * A finding of harassment is counted when the finding column says After
+ * Inquest or After Trial. The value No Harassment does not count.
+ *
+ * The building is matched on the dataset's `bbl` column. 318 rows in the whole
+ * table have no `bbl`, and this function cannot count those. The respondent
+ * name, the penalty, and the case identifiers are never returned. Case type
+ * labels are the source's own, including its spelling "Harrassment".
+ */
+async function hpdLitigation(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so litigation cannot be looked up');
+  }
+
+  // Socrata does the counting. One row comes back for each combination of
+  // case type, status, and harassment finding.
+  const rows = await socrata('59kj-x8nc', {
+    $select: 'casetype, casestatus, findingofharassment, count(*) AS cases, max(caseopendate) AS latest',
+    $where: `bbl='${building.bbl}'`,
+    $group: 'casetype, casestatus, findingofharassment',
+  });
+
+  let total = 0;
+  let pending = 0;
+  let harassmentFindings = 0;
+  const byType = {};
+  let latestOpenDate = null;
+
+  for (const row of rows) {
+    const count = Number(row.cases);
+    total += count;
+    byType[row.casetype] = (byType[row.casetype] ?? 0) + count;
+    if (row.casestatus === 'PENDING' || row.casestatus === 'APPLICATION PENDING') pending += count;
+    if (row.findingofharassment === 'After Inquest' || row.findingofharassment === 'After Trial') {
+      harassmentFindings += count;
+    }
+    if (row.latest && (!latestOpenDate || row.latest > latestOpenDate)) latestOpenDate = row.latest;
+  }
+
+  return {
+    source: '59kj-x8nc',
+    totalCases: total,
+    pendingCases: pending,
+    casesByType: byType,
+    harassmentFindings,
+    latestCaseOpenDate: latestOpenDate ? latestOpenDate.slice(0, 10) : null,
+  };
+}
+
 // TODO: add the other datasets from the brief, one function each, e.g.
 //   async function hpdViolations(building) { ... }
 //   async function dobViolations(building) { ... }
@@ -186,6 +246,7 @@ const DATASETS = {
   evictions,
   hpdViolations,
   hpdComplaints,
+  hpdLitigation,
 };
 
 // ---------------------------------------------------------------------------
