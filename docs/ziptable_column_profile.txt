@@ -1,12 +1,12 @@
 ZIP TABLE SPECIFICATION
 
 Table                 : Housing Court cases by ZIP code (ZIP code is the Zone Improvement Plan code)
-File                  : zip_housing_court.csv
+File                  : ziptable.csv
 Built by              : ziptable_build.py
 Source                : Housing Data Coalition (HDC) extract of Office of Court Administration (OCA) Housing Court records,
                         tables oca_index and oca_addresses, https://oca-2-dev.s3.amazonaws.com/public/
 ZIP code list         : the ZIP codes on at least one New York City tax lot in PLUTO (Primary Land Use Tax Lot Output)
-Created               : 2026-10-13 18:07
+Created               : 2026-10-17 18:14
 Number of columns     : 14
 Number of rows        : 4,340 (217 ZIP codes times 10 years times 2 property groups)
 
