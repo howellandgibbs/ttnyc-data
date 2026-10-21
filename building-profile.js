@@ -366,9 +366,67 @@ async function dobViolations(building) {
   };
 }
 
-// TODO: add the other datasets from the brief, one function each, e.g.
-//   async function ecbViolations(building) { ... }
-// then list them in DATASETS below.
+/**
+ * Department of Buildings summonses judged by the Environmental Control Board
+ * (6bgk-3dad): the number of buildings on the lot, the number of summonses,
+ * the number still active, the active ones by severity, and the latest issue
+ * date.
+ *
+ * A summons is counted when its building number (BIN) is in the list of BINs
+ * on the lot, or when the row itself is on the building's lot. This dataset
+ * holds the borough as one digit, the block as 5 digits, and the lot as 4
+ * digits. A placeholder BIN is never used in the query. If the list of BINs is
+ * empty, only the lot is used.
+ *
+ * A summons is active when its status is ACTIVE. The source also uses RESOLVE
+ * and, for 3 rows in the whole table, Unknown. The respondent name, the
+ * penalty, and the dollar amounts are never returned. The source does not
+ * define the money columns, so no dollar figure is returned.
+ */
+async function ecbViolations(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so summonses cannot be looked up');
+  }
+
+  const bins = await binsOnLot(building);
+
+  const borough = building.bbl.slice(0, 1);
+  const block = building.bbl.slice(1, 6);
+  const lot = building.bbl.slice(6, 10);
+  const onLot = `(boro='${borough}' AND block='${block}' AND lot='${lot}')`;
+  const binList = bins.map((bin) => `'${bin}'`).join(',');
+  const where = bins.length > 0 ? `(bin in (${binList}) OR ${onLot})` : onLot;
+
+  const rows = await socrata('6bgk-3dad', {
+    $select: 'ecb_violation_status, severity, count(*) AS summonses, max(issue_date) AS latest',
+    $where: where,
+    $group: 'ecb_violation_status, severity',
+  });
+
+  let total = 0;
+  let active = 0;
+  const activeBySeverity = {};
+  let latest = null;
+  for (const row of rows) {
+    const count = Number(row.summonses);
+    total += count;
+    if (row.latest && (!latest || row.latest > latest)) latest = row.latest;
+    if (row.ecb_violation_status === 'ACTIVE') {
+      active += count;
+      const severity = row.severity ?? 'Not stated';
+      activeBySeverity[severity] = (activeBySeverity[severity] ?? 0) + count;
+    }
+  }
+
+  return {
+    source: '6bgk-3dad',
+    buildingsOnLot: bins.length,
+    totalSummonses: total,
+    activeSummonses: active,
+    activeBySeverity,
+    latestIssueDate: formatCompactDate(latest),
+  };
+}
 
 const DATASETS = {
   evictions,
@@ -376,6 +434,7 @@ const DATASETS = {
   hpdComplaints,
   hpdLitigation,
   dobViolations,
+  ecbViolations,
 };
 
 // ---------------------------------------------------------------------------
