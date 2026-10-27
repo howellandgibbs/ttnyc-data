@@ -143,14 +143,19 @@ async function hpdViolations(building) {
 }
 
 /**
- * HPD housing maintenance code complaints (ygpa-z7cr): the number of separate
- * complaints, how many are still open, the number received in the last 365
- * days, and the date of the latest complaint.
+ * HPD housing maintenance code complaints (ygpa-z7cr): how many complaints are
+ * still open, the number received in the last 365 days, and the date of the
+ * latest complaint.
  *
  * Each row in this table is one problem inside a complaint, and one complaint
  * can hold several problems. So this function counts the distinct complaint
- * identifiers, not rows. A complaint has one status and one received date, so
- * the counts can be added across groups.
+ * identifiers, not rows.
+ *
+ * There is no all-time total. Counting every complaint back to 2003 took 17 to
+ * 38 seconds on the largest buildings, longer than the request timeout, so the
+ * whole dataset came back as an error exactly where it matters most. Both
+ * counts below are filtered first (open, or received in the last year), which
+ * keeps them to a few seconds.
  *
  * The building is matched on the dataset's `bbl` column. About 37,400 of the
  * 16.4 million rows in the whole table have no `bbl`, and this function cannot
@@ -169,15 +174,17 @@ async function hpdComplaints(building) {
   const startText = `${startDate.toISOString().slice(0, 10)}T00:00:00`;
 
   // Three questions, asked at the same time. Socrata does the counting.
-  const [groups, latest, recent] = await Promise.all([
+  const [openRows, latest, recent] = await Promise.all([
     socrata('ygpa-z7cr', {
-      $select: 'complaint_status, count(distinct complaint_id) AS complaints',
-      $where: `bbl=${building.bbl}`,
-      $group: 'complaint_status',
+      $select: 'count(distinct complaint_id) AS complaints',
+      $where: `bbl=${building.bbl} AND complaint_status='OPEN'`,
     }),
+    // Grouped by bbl on purpose: the plain max() took 36 and 89 seconds at
+    // 98-09 64 Road in testing, while this form took 1.5 to 2.4.
     socrata('ygpa-z7cr', {
-      $select: 'max(received_date) AS latest',
+      $select: 'bbl, max(received_date) AS latest',
       $where: `bbl=${building.bbl}`,
+      $group: 'bbl',
     }),
     socrata('ygpa-z7cr', {
       $select: 'count(distinct complaint_id) AS complaints',
@@ -185,19 +192,10 @@ async function hpdComplaints(building) {
     }),
   ]);
 
-  let total = 0;
-  let open = 0;
-  for (const row of groups) {
-    const count = Number(row.complaints);
-    total += count;
-    if (row.complaint_status === 'OPEN') open += count;
-  }
-
   const latestDate = latest[0]?.latest ?? null;
   return {
     source: 'ygpa-z7cr',
-    totalComplaints: total,
-    openComplaints: open,
+    openComplaints: Number(openRows[0]?.complaints ?? 0),
     complaintsLast12Months: Number(recent[0]?.complaints ?? 0),
     latestComplaintDate: latestDate ? latestDate.slice(0, 10) : null,
   };
