@@ -256,9 +256,118 @@ async function hpdLitigation(building) {
   };
 }
 
+/**
+ * Decides whether one building number (BIN) can be used to look up Department
+ * of Buildings data. A missing BIN, a BIN that is not 7 digits, or a
+ * placeholder BIN that ends in 000000 would return other buildings' records,
+ * so it is not used.
+ * Returns null when the BIN is usable, or a short note saying why not.
+ */
+function binProblem(bin) {
+  if (!bin) return 'The building number (BIN) is missing.';
+  if (!/^\d{7}$/.test(bin)) return 'The building number (BIN) is not 7 digits.';
+  if (/000000$/.test(bin)) return 'The building number (BIN) is a placeholder that ends in 000000.';
+  return null;
+}
+
+/**
+ * Lists the usable building numbers (BINs) of every building on the building's
+ * tax lot (the Borough, Block, and Lot, called bbl here).
+ *
+ * NYC Building Footprints (5zhs-2jue) returns the BIN of every building on the
+ * lot. The BIN that the address search returned (building.bin) is added to
+ * that list. Every BIN that binProblem() rejects is removed, and each BIN is
+ * listed once. The list can be empty.
+ */
+async function binsOnLot(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so the buildings on the lot cannot be listed');
+  }
+
+  const rows = await socrata('5zhs-2jue', {
+    $select: 'bin',
+    $where: `mappluto_bbl='${building.bbl}' OR base_bbl='${building.bbl}'`,
+  });
+
+  const candidateBins = [building.bin, ...rows.map((row) => row.bin)];
+  const usableBins = candidateBins.filter((bin) => binProblem(bin) === null);
+  return [...new Set(usableBins)];
+}
+
+/** The source writes dates as YYYYMMDD. This turns one into YYYY-MM-DD. */
+function formatCompactDate(text) {
+  return /^\d{8}$/.test(text ?? '') ? `${text.slice(0, 4)}-${text.slice(4, 6)}-${text.slice(6, 8)}` : null;
+}
+
+/**
+ * Department of Buildings violations (3h2n-5cm9): the older civil penalties
+ * that the Department of Buildings recorded. The newer civil penalties are in
+ * a different dataset, DOB Safety Violations, which this function does not
+ * read. Summonses judged by the Environmental Control Board are in the next
+ * function.
+ *
+ * Returns the number of buildings on the lot, the number of violations, the
+ * number still active, how many of the active ones are hazardous, and the
+ * latest issue date.
+ *
+ * A violation is counted when its building number (BIN) is in the list of
+ * BINs on the lot, or when the row itself is on the building's lot. This
+ * dataset holds the borough as one digit, the block as 5 digits, and the lot
+ * as 5 digits. A placeholder BIN is never used in the query. If the list of
+ * BINs is empty, only the lot is used.
+ *
+ * A violation is active when its category ends with the word ACTIVE. One
+ * category with the text "V%-DOB VIOLATION" (about 1,000 rows in the whole
+ * table) does not say active or dismissed and is not counted as active.
+ * Hazardous means the category starts with VH or VWH.
+ */
+async function dobViolations(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so violations cannot be looked up');
+  }
+
+  const bins = await binsOnLot(building);
+
+  const borough = building.bbl.slice(0, 1);
+  const block = building.bbl.slice(1, 6);
+  const lot = '0' + building.bbl.slice(6, 10);
+  const onLot = `(boro='${borough}' AND block='${block}' AND lot='${lot}')`;
+  const binList = bins.map((bin) => `'${bin}'`).join(',');
+  const where = bins.length > 0 ? `(bin in (${binList}) OR ${onLot})` : onLot;
+
+  const rows = await socrata('3h2n-5cm9', {
+    $select: 'violation_category, count(*) AS violations, max(issue_date) AS latest',
+    $where: where,
+    $group: 'violation_category',
+  });
+
+  let total = 0;
+  let active = 0;
+  let activeHazardous = 0;
+  let latest = null;
+  for (const row of rows) {
+    const count = Number(row.violations);
+    const category = row.violation_category ?? '';
+    total += count;
+    if (row.latest && (!latest || row.latest > latest)) latest = row.latest;
+    if (category.endsWith('ACTIVE')) {
+      active += count;
+      if (category.startsWith('VH') || category.startsWith('VWH')) activeHazardous += count;
+    }
+  }
+
+  return {
+    source: '3h2n-5cm9',
+    buildingsOnLot: bins.length,
+    totalViolations: total,
+    activeViolations: active,
+    activeHazardousViolations: activeHazardous,
+    latestIssueDate: formatCompactDate(latest),
+  };
+}
+
 // TODO: add the other datasets from the brief, one function each, e.g.
-//   async function hpdViolations(building) { ... }
-//   async function dobViolations(building) { ... }
+//   async function ecbViolations(building) { ... }
 // then list them in DATASETS below.
 
 const DATASETS = {
@@ -266,6 +375,7 @@ const DATASETS = {
   hpdViolations,
   hpdComplaints,
   hpdLitigation,
+  dobViolations,
 };
 
 // ---------------------------------------------------------------------------
