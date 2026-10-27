@@ -144,8 +144,8 @@ async function hpdViolations(building) {
 
 /**
  * HPD housing maintenance code complaints (ygpa-z7cr): the number of separate
- * complaints, how many are still open, the number received in each year, and
- * the date of the latest complaint.
+ * complaints, how many are still open, the number received in the last 365
+ * days, and the date of the latest complaint.
  *
  * Each row in this table is one problem inside a complaint, and one complaint
  * can hold several problems. So this function counts the distinct complaint
@@ -162,27 +162,34 @@ async function hpdComplaints(building) {
     throw new Error('bbl is not 10 digits, so complaints cannot be looked up');
   }
 
-  // Two questions, asked at the same time. Socrata does the counting.
-  const [groups, latest] = await Promise.all([
+  // The date 365 days before today, written the way NYC Open Data accepts it
+  // in a received_date filter (tested on 2026-10-21).
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  const startDate = new Date(Date.now() - 365 * millisecondsPerDay);
+  const startText = `${startDate.toISOString().slice(0, 10)}T00:00:00`;
+
+  // Three questions, asked at the same time. Socrata does the counting.
+  const [groups, latest, recent] = await Promise.all([
     socrata('ygpa-z7cr', {
-      $select: 'date_extract_y(received_date) AS year, complaint_status, count(distinct complaint_id) AS complaints',
+      $select: 'complaint_status, count(distinct complaint_id) AS complaints',
       $where: `bbl=${building.bbl}`,
-      $group: 'year, complaint_status',
-      $order: 'year',
+      $group: 'complaint_status',
     }),
     socrata('ygpa-z7cr', {
       $select: 'max(received_date) AS latest',
       $where: `bbl=${building.bbl}`,
     }),
+    socrata('ygpa-z7cr', {
+      $select: 'count(distinct complaint_id) AS complaints',
+      $where: `bbl=${building.bbl} AND received_date >= '${startText}'`,
+    }),
   ]);
 
   let total = 0;
   let open = 0;
-  const byYear = {};
   for (const row of groups) {
     const count = Number(row.complaints);
     total += count;
-    byYear[row.year] = (byYear[row.year] ?? 0) + count;
     if (row.complaint_status === 'OPEN') open += count;
   }
 
@@ -191,7 +198,7 @@ async function hpdComplaints(building) {
     source: 'ygpa-z7cr',
     totalComplaints: total,
     openComplaints: open,
-    complaintsByYear: byYear,
+    complaintsLast12Months: Number(recent[0]?.complaints ?? 0),
     latestComplaintDate: latestDate ? latestDate.slice(0, 10) : null,
   };
 }
