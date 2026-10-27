@@ -1,0 +1,97 @@
+JOIN CHECK OF THE HOUSING COURT TABLES
+
+oca_index rows read: 2,366,542
+oca_addresses rows read: 2,367,109
+ZIP codes in PLUTO: 217 (expected 217)
+
+CASES IN THE NEW YORK CITY COURTS: 1,749,362
+     611,230  Bronx County Civil Court
+      28,419  Harlem Community Justice Center
+     472,748  Kings County Civil Court
+     319,463  New York County Civil Court
+     274,058  Queens County Civil Court
+       5,080  Redhook Community Justice Center
+      38,364  Richmond County Civil Court
+
+CASES WITH NO ADDRESS ROW: 0 (0.0%)
+
+MORE THAN ONE ADDRESS, AND ORPHANS
+  Extra address rows for New York City cases: 26
+  Of those, rows with a different ZIP code: 1
+  Address rows whose case code is not in oca_index: 511
+  Different case codes among those rows: 511
+  New York City cases whose first address is outside New York State: 111
+
+ZIP CODES OF THE CASES THAT HAVE AN ADDRESS
+  Cases with an address: 1,749,362
+  ZIP code is in the list of 217: 1,747,677 (99.9%)
+  ZIP code is not in the list: 1,685 (0.1%)
+           477  00000
+           197  11111
+           169  99999
+           138  10162
+            54  11242
+            30  11424
+            27  11202
+            21  10168
+            20  10311
+            16  19999
+            16  10107
+            12  11425
+            11  11380
+            10  11003
+             9  11431
+    ... and 270 more values not shown.
+
+PROPERTY TYPE OF ALL NEW YORK CITY CASES
+   1,675,526   95.8%  Residential
+      73,836    4.2%  Commercial
+
+BLANK PROPERTY TYPE BY FILING YEAR (New York City cases)
+  2016:   259,881 cases,         0 blank (0.0%)
+  2017:   252,019 cases,         0 blank (0.0%)
+  2018:   244,010 cases,         0 blank (0.0%)
+  2019:   193,958 cases,         0 blank (0.0%)
+  2020:    85,944 cases,         0 blank (0.0%)
+  2021:    54,134 cases,         0 blank (0.0%)
+  2022:   126,495 cases,         0 blank (0.0%)
+  2023:   152,562 cases,         0 blank (0.0%)
+  2024:   140,527 cases,         0 blank (0.0%)
+  2025:   133,700 cases,         0 blank (0.0%)
+  2026:   106,132 cases,         0 blank (0.0%)
+
+CASE TYPES OF ALL NEW YORK CITY CASES
+   1,347,023   77.0%  Non-Payment
+     262,039   15.0%  Holdover
+     102,263    5.8%  HP
+      19,049    1.1%  Illegal Lockout
+      11,316    0.6%  HP with Harassment
+       7,305    0.4%  Harassment
+         182    0.0%  Illegal Activity
+         154    0.0%  Article 7A
+          31    0.0%  Breach of Warrant of Habitability
+
+CASES THE ZIP TABLE WOULD HOLD (2016 to 2025, list ZIP codes only): 1,641,618
+   1,572,553   95.8%  Residential
+      69,065    4.2%  Commercial
+
+ZIP CODES WITH THE MOST CASES (2016 to 2025)
+      49,342  10456
+      48,852  10453
+      43,463  10467
+      43,260  10457
+      42,939  10452
+      39,827  10458
+      38,822  10468
+      37,785  11226
+      35,373  11212
+      31,390  10460
+      29,767  11207
+      29,746  10451
+      25,531  10029
+      25,441  10462
+      24,559  10459
+
+ZIP CODES OF THE LIST WITH NO CASE IN 2016 TO 2025: 6
+  10105, 10121, 10271, 10278, 10803, 11695
+
