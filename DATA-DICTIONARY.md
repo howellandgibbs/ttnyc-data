@@ -1,7 +1,7 @@
 # Data dictionary
 
 Author: Felix Suwarno
-Last updated: 2026-10-21
+Last updated: 2026-10-28
 
 This file currently covers the Housing Court ZIP table, its run record, and one note about Environmental Control Board severity labels. The building-level fields have no section here yet.
 
@@ -39,22 +39,22 @@ In the field entries below, "source" names the Housing Data Coalition column the
 
 ### `non_payment`
 - Type: number.
-- Meaning: cases with case type Non-Payment.
+- Meaning: cases with case type Non-Payment. The landlord sues for unpaid rent.
 - Source: `classification` in `oca_index`.
 
 ### `holdover`
 - Type: number.
-- Meaning: cases with case type Holdover.
+- Meaning: cases with case type Holdover. The landlord wants the apartment back for a reason other than unpaid rent, for example the lease ended.
 - Source: `classification` in `oca_index`.
 
 ### `hp`
 - Type: number.
-- Meaning: cases with case type HP. HP is the source's own label.
+- Meaning: cases with case type HP. HP is the source's own label. The tenant sues to force the landlord to make repairs.
 - Source: `classification` in `oca_index`.
 
 ### `illegal_lockout`
 - Type: number.
-- Meaning: cases with case type Illegal Lockout.
+- Meaning: cases with case type Illegal Lockout. The tenant was locked out without a court order.
 - Source: `classification` in `oca_index`.
 
 ### `hp_with_harassment`
@@ -91,7 +91,7 @@ In the field entries below, "source" names the Housing Data Coalition column the
 
 - Every value is a count of cases. The table has no rates.
 - Every value except `zip` and `property_group` is a whole number made of digits only.
-- Only cases from the Bronx, Kings, New York, Queens, and Richmond County Civil Courts, the Harlem Community Justice Center, and the Redhook Community Justice Center are counted. Liam Howell states that the last two are New York City courts. That has not been checked against a court source.
+- Only cases from the Bronx, Kings, New York, Queens, and Richmond County Civil Courts, the Harlem Community Justice Center, and the Red Hook Community Justice Center are counted. The Harlem Community Justice Center and the Red Hook Community Justice Center are community courts listed on the New York City Civil Court pages of the New York State courts website (https://nycourts.gov/courts/nyc/civil/communitycourts.shtml). The source data spells the second one "Redhook Community Justice Center." As of October 28, 2026, the courts website says the Harlem Community Justice Center is temporarily closed and sends cases to the New York County Civil Court at 111 Centre Street (https://www.nycourts.gov/node/160101). Both courts are counted in the table, so the ZIP code counts are not affected.
 - Cases filed in 2026 or later are not in the table.
 - Cases with a ZIP code that is not on the list of 217 are not in the table.
 - The table holds no case code, no party name, no tenant name, and no address.
@@ -114,11 +114,13 @@ The build script writes this file next to `ziptable.csv`. It holds no case code.
 
 ## Environmental Control Board severity labels
 
-This note comes from Liam Howell's review of pull request #10. It describes the source. It changes no code.
+This note describes the source. It changes no code.
 
 The Environmental Control Board violations dataset (identifier `6bgk-3dad`) labels severity in two ways:
 
 - Newer summonses say CLASS - 1, CLASS - 2, and CLASS - 3.
 - Older summonses say Hazardous or Non-Hazardous.
 
-Both sets of labels are kept as they are in the source. They are not merged or converted. Holly Gibbs decides how the site shows them. The name of the source column that holds the severity label is not recorded in this file yet.
+Both sets of labels are kept as they are in the source. They are not merged or converted. How the site shows them has not been decided.
+
+The source column that holds the severity label is `severity` in dataset `6bgk-3dad`. `building-profile.js` returns it as `activeBySeverity`.
