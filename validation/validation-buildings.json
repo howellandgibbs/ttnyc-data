@@ -1,0 +1,421 @@
+{
+  "pulledOn": "2026-11-12",
+  "about": "Expected counts for the 23 validation buildings in the project brief. Pulled directly from NYC Open Data by pull-baseline.mjs, not through building-profile.js, so the two can check each other. Same numbers as the \"Validation buildings\" tab of the brief.",
+  "tolerance": "Zero must match exactly. Any other count passes within 10% or 5, whichever is larger. BBL and BIN from GeoSearch must match exactly. unitsRes and yearBuilt are recorded but not checked, because building-profile.js does not return them.",
+  "buildings": [
+    {
+      "set": "worst",
+      "address": "530 East 169 Street, Bronx",
+      "bbl": "2026100012",
+      "bin": "2004223",
+      "unitsRes": 321,
+      "yearBuilt": 1965,
+      "expected": {
+        "hpdOpenA": 132,
+        "hpdOpenB": 757,
+        "hpdOpenC": 373,
+        "complaintsLast12Months": 502,
+        "litigationCases": 96,
+        "harassmentFindings": 0,
+        "residentialEvictions": 50,
+        "ecbActive": 64
+      }
+    },
+    {
+      "set": "worst",
+      "address": "2179 Washington Avenue, Bronx",
+      "bbl": "2030370077",
+      "bin": "2011324",
+      "unitsRes": 36,
+      "yearBuilt": 1912,
+      "expected": {
+        "hpdOpenA": 132,
+        "hpdOpenB": 498,
+        "hpdOpenC": 298,
+        "complaintsLast12Months": 59,
+        "litigationCases": 32,
+        "harassmentFindings": 0,
+        "residentialEvictions": 1,
+        "ecbActive": 8
+      }
+    },
+    {
+      "set": "worst",
+      "address": "1593 Fulton Street, Brooklyn",
+      "bbl": "3016840001",
+      "bin": "3047699",
+      "unitsRes": 248,
+      "yearBuilt": 1980,
+      "expected": {
+        "hpdOpenA": 56,
+        "hpdOpenB": 247,
+        "hpdOpenC": 291,
+        "complaintsLast12Months": 96,
+        "litigationCases": 45,
+        "harassmentFindings": 0,
+        "residentialEvictions": 19,
+        "ecbActive": 10
+      }
+    },
+    {
+      "set": "worst",
+      "address": "2026 Nostrand Avenue, Brooklyn",
+      "bbl": "3052520040",
+      "bin": "3121727",
+      "unitsRes": 11,
+      "yearBuilt": 1931,
+      "expected": {
+        "hpdOpenA": 63,
+        "hpdOpenB": 243,
+        "hpdOpenC": 259,
+        "complaintsLast12Months": 55,
+        "litigationCases": 24,
+        "harassmentFindings": 0,
+        "residentialEvictions": 2,
+        "ecbActive": 6
+      }
+    },
+    {
+      "set": "worst",
+      "address": "41-40 Denman Street, Elmhurst",
+      "bbl": "4015660021",
+      "bin": "4039157",
+      "unitsRes": 122,
+      "yearBuilt": 1961,
+      "expected": {
+        "hpdOpenA": 64,
+        "hpdOpenB": 263,
+        "hpdOpenC": 239,
+        "complaintsLast12Months": 21,
+        "litigationCases": 21,
+        "harassmentFindings": 0,
+        "residentialEvictions": 12,
+        "ecbActive": 6
+      }
+    },
+    {
+      "set": "well-run",
+      "address": "405 East 56 Street, Manhattan",
+      "bbl": "1013680005",
+      "bin": "1040467",
+      "unitsRes": 173,
+      "yearBuilt": 1961,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 8,
+        "litigationCases": 2,
+        "harassmentFindings": 0,
+        "residentialEvictions": 2,
+        "ecbActive": 2
+      }
+    },
+    {
+      "set": "well-run",
+      "address": "1596 York Avenue, Manhattan",
+      "bbl": "1015810049",
+      "bin": "1051230",
+      "unitsRes": 233,
+      "yearBuilt": 1968,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 0,
+        "litigationCases": 0,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 0
+      }
+    },
+    {
+      "set": "well-run",
+      "address": "113-14 72 Road, Forest Hills",
+      "bbl": "4022510027",
+      "bin": "4052719",
+      "unitsRes": 108,
+      "yearBuilt": 1941,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 0,
+        "litigationCases": 0,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 1
+      }
+    },
+    {
+      "set": "well-run",
+      "address": "650 First Avenue, Manhattan",
+      "bbl": "1009690001",
+      "bin": "1022547",
+      "unitsRes": 111,
+      "yearBuilt": 1910,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 3,
+        "litigationCases": 0,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 0
+      }
+    },
+    {
+      "set": "well-run",
+      "address": "1588 Third Avenue, Manhattan",
+      "bbl": "1015180033",
+      "bin": "1048122",
+      "unitsRes": 96,
+      "yearBuilt": 1980,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 2,
+        "litigationCases": 0,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 0
+      }
+    },
+    {
+      "set": "new",
+      "address": "30-25 Queens Boulevard, Long Island City",
+      "bbl": "4002390006",
+      "bin": "4000000",
+      "unitsRes": 560,
+      "yearBuilt": 2025,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 0,
+        "litigationCases": 0,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 4
+      }
+    },
+    {
+      "set": "new",
+      "address": "960 Franklin Avenue, Brooklyn",
+      "bbl": "3011920040",
+      "bin": "3000000",
+      "unitsRes": 301,
+      "yearBuilt": 2025,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 1,
+        "litigationCases": 0,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 0
+      }
+    },
+    {
+      "set": "new",
+      "address": "303 East 44 Street, Manhattan",
+      "bbl": "1013370105",
+      "bin": "1000000",
+      "unitsRes": 131,
+      "yearBuilt": 2025,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 0,
+        "litigationCases": 4,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 0
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "765 Lincoln Avenue, Brooklyn",
+      "bbl": "3042710001",
+      "bin": "3343260",
+      "unitsRes": 0,
+      "yearBuilt": 0,
+      "expected": {
+        "hpdOpenA": 476,
+        "hpdOpenB": 2366,
+        "hpdOpenC": 887,
+        "complaintsLast12Months": 817,
+        "litigationCases": 220,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 97
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "20 Richman Plaza, Bronx",
+      "bbl": "2028820229",
+      "bin": "2127134",
+      "unitsRes": 1654,
+      "yearBuilt": 1973,
+      "expected": {
+        "hpdOpenA": 178,
+        "hpdOpenB": 488,
+        "hpdOpenC": 280,
+        "complaintsLast12Months": 643,
+        "litigationCases": 351,
+        "harassmentFindings": 0,
+        "residentialEvictions": 393,
+        "ecbActive": 3
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "605 West 42 Street, Manhattan",
+      "bbl": "1010907502",
+      "bin": "1089438",
+      "unitsRes": 1166,
+      "yearBuilt": 2008,
+      "expected": {
+        "hpdOpenA": 21,
+        "hpdOpenB": 40,
+        "hpdOpenC": 13,
+        "complaintsLast12Months": 88,
+        "litigationCases": 17,
+        "harassmentFindings": 0,
+        "residentialEvictions": 88,
+        "ecbActive": 2
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "1609 East 174 Street, Bronx",
+      "bbl": "2038860002",
+      "bin": "2092908",
+      "unitsRes": 1250,
+      "yearBuilt": 1952,
+      "expected": {
+        "hpdOpenA": 3,
+        "hpdOpenB": 5,
+        "hpdOpenC": 2,
+        "complaintsLast12Months": 1,
+        "litigationCases": 4,
+        "harassmentFindings": 0,
+        "residentialEvictions": 22,
+        "ecbActive": 12
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "1 Flatbush Avenue, Brooklyn",
+      "bbl": "3021067503",
+      "bin": "3424472",
+      "unitsRes": 183,
+      "yearBuilt": 2016,
+      "expected": {
+        "hpdOpenA": 0,
+        "hpdOpenB": 0,
+        "hpdOpenC": 0,
+        "complaintsLast12Months": 5,
+        "litigationCases": 0,
+        "harassmentFindings": 0,
+        "residentialEvictions": 1,
+        "ecbActive": 0
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "1650 President Street, Brooklyn",
+      "bbl": "3014080023",
+      "bin": "3324653",
+      "unitsRes": 60,
+      "yearBuilt": 1923,
+      "expected": {
+        "hpdOpenA": 8,
+        "hpdOpenB": 58,
+        "hpdOpenC": 16,
+        "complaintsLast12Months": 75,
+        "litigationCases": 1,
+        "harassmentFindings": 0,
+        "residentialEvictions": 0,
+        "ecbActive": 1
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "252 South Street, Manhattan",
+      "bbl": "1002487501",
+      "bin": "1089771",
+      "unitsRes": 1021,
+      "yearBuilt": 2015,
+      "expected": {
+        "hpdOpenA": 15,
+        "hpdOpenB": 36,
+        "hpdOpenC": 20,
+        "complaintsLast12Months": 200,
+        "litigationCases": 15,
+        "harassmentFindings": 0,
+        "residentialEvictions": 14,
+        "ecbActive": 4
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "280 East Houston Street, Manhattan",
+      "bbl": "1003977503",
+      "bin": "1004960",
+      "unitsRes": 132,
+      "yearBuilt": 1989,
+      "expected": {
+        "hpdOpenA": 22,
+        "hpdOpenB": 33,
+        "hpdOpenC": 3,
+        "complaintsLast12Months": 10,
+        "litigationCases": 1,
+        "harassmentFindings": 0,
+        "residentialEvictions": 1,
+        "ecbActive": 1
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "98-09 64 Road, Rego Park",
+      "bbl": "4021010001",
+      "bin": "4431979",
+      "unitsRes": 146,
+      "yearBuilt": 1949,
+      "expected": {
+        "hpdOpenA": 18,
+        "hpdOpenB": 41,
+        "hpdOpenC": 3,
+        "complaintsLast12Months": 4,
+        "litigationCases": 1,
+        "harassmentFindings": 1,
+        "residentialEvictions": 0,
+        "ecbActive": 0
+      }
+    },
+    {
+      "set": "oddity",
+      "address": "2540 Barker Avenue, Bronx",
+      "bbl": "2044280019",
+      "bin": "2051290",
+      "unitsRes": 116,
+      "yearBuilt": 1983,
+      "expected": {
+        "hpdOpenA": 9,
+        "hpdOpenB": 80,
+        "hpdOpenC": 25,
+        "complaintsLast12Months": 99,
+        "litigationCases": 17,
+        "harassmentFindings": 0,
+        "residentialEvictions": 1,
+        "ecbActive": 3
+      }
+    }
+  ]
+}
