@@ -27,9 +27,16 @@ This repository holds the data work for Tenant Triage NYC. It uses public New Yo
 - `HPD_buildings_column_profile.py` downloads the whole Buildings Subject to Housing Preservation and Development Jurisdiction table and describes every column.
 - `HPD_buildings_download_zip_10456.py` downloads the rows of that table for ZIP code 10456, as a sample to check.
 
+### Validation
+
+- `validation/validation-buildings.json` holds the expected counts for the 23 validation buildings in the project brief, and the date they were pulled.
+- `validation/validate.mjs` looks up each of those buildings the way the website does and checks `building-profile.js` against the expected counts. It prints one line per building and ends with how many passed.
+- `validation/pull-baseline.mjs` re-pulls the expected counts straight from NYC Open Data, without using `building-profile.js`, and rewrites `validation-buildings.json`. Run it about once a month, because the counts change every day.
+
 ### Documents
 
 - `docs/` holds the plain-text column descriptions that the scripts write.
+- `METHODOLOGY.md` explains where each number comes from and what it cannot tell you. `DATA-DICTIONARY.md` describes every field.
 
 ## How to run a script
 
@@ -40,9 +47,16 @@ This repository holds the data work for Tenant Triage NYC. It uses public New Yo
 - `ziptable_build.py` needs about 400 megabytes of free memory and several minutes.
 - Each script's first lines explain what it does and what it does not do.
 
+## How to run the validation
+
+- Install Node.js 18 or later.
+- Open a terminal in the repository folder.
+- Type `node validation/validate.mjs`. It takes a few minutes, because it asks NYC Open Data about every building.
+- A building can fail because the data changed since the expected counts were pulled, or because NYC Open Data was busy. If many buildings fail, run `node validation/pull-baseline.mjs`, look at what changed with `git diff`, and run the validation again.
+
 ## The Socrata app token
 
-- The two Housing Preservation and Development scripts can use a free Socrata app token. The token lets New York City Open Data send data faster.
+- The two Housing Preservation and Development scripts and the two validation scripts can use a free Socrata app token. The token lets New York City Open Data send data faster.
 - The token is optional. Without it, the scripts still run, but more slowly.
 - To use a token, store it in a computer setting named `SOCRATA_APP_TOKEN`. Never write the token inside a script or upload it to this repository.
 
