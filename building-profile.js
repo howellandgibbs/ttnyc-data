@@ -433,6 +433,157 @@ async function ecbViolations(building) {
   };
 }
 
+/**
+ * Housing Preservation and Development (HPD) housing maintenance code
+ * violations at New York City Housing Authority (NYCHA) properties
+ * (im9z-53hg). HPD publishes these violations in a separate dataset from the
+ * one that hpdViolations reads.
+ *
+ * Returns the number of violations, the number by hazard class (A, B, or C),
+ * and the latest inspection date.
+ *
+ * The building is matched on the dataset's `bbl` column, which is a number
+ * column, so the bbl is written without quotes. Rows where issued_in_err is 'Y'
+ * (issued in error) are left out; rows where it is empty are kept. The
+ * inspection date is the column insp_dt.
+ *
+ * This dataset has no open or closed status, so no open count is returned. It
+ * starts in September 2025, so the counts do not cover earlier years. The
+ * violation description, the apartment, and the stairhall are never returned.
+ */
+async function nychaViolations(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so NYCHA violations cannot be looked up');
+  }
+
+  const rows = await socrata('im9z-53hg', {
+    $select: 'hzrd_clas, count(*) AS violations, max(insp_dt) AS latest',
+    $where: `bbl=${building.bbl} AND (issued_in_err IS NULL OR issued_in_err != 'Y')`,
+    $group: 'hzrd_clas',
+  });
+
+  let total = 0;
+  const byClass = {};
+  let latest = null;
+  for (const row of rows) {
+    const count = Number(row.violations);
+    total += count;
+    const hazardClass = row.hzrd_clas ?? 'Not stated';
+    byClass[hazardClass] = (byClass[hazardClass] ?? 0) + count;
+    if (row.latest && (!latest || row.latest > latest)) latest = row.latest;
+  }
+
+  return {
+    source: 'im9z-53hg',
+    total,
+    byClass,
+    latestInspectionDate: latest ? latest.slice(0, 10) : null,
+  };
+}
+
+/**
+ * Looks up the building's tax lot in the New York City Department of City
+ * Planning's PLUTO dataset (64uk-42ks) and returns the three values that this
+ * file uses from it: the owner name, the number of residential units, and the
+ * year built.
+ *
+ * Returns null when PLUTO has no row for the lot. The bbl is a number column in
+ * this dataset, so it is written without quotes.
+ *
+ * The owner name can be a person's name, so it must never leave this file. It
+ * is used only to decide the NYCHA flag in nychaFlag(). This function is called
+ * once per building, and its answer is shared by nychaFlag() and pluto().
+ */
+async function plutoRow(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so PLUTO cannot be looked up');
+  }
+
+  const rows = await socrata('64uk-42ks', {
+    $select: 'ownername, unitsres, yearbuilt',
+    $where: `bbl=${building.bbl}`,
+    $limit: '1',
+  });
+  return rows[0] ?? null;
+}
+
+/**
+ * Looks up the NYCHA Residential Addresses list (3ub5-4ph8). The column
+ * borough_block_lot is a number column, so the bbl is written without quotes.
+ * Returns the development name from the matching rows, or null when no row
+ * matches. If rows of one lot name more than one development, the first name in
+ * alphabetical order is returned.
+ */
+async function nychaAddressRow(building) {
+  if (!/^\d{10}$/.test(building.bbl)) {
+    throw new Error('bbl is not 10 digits, so the NYCHA address list cannot be looked up');
+  }
+
+  const rows = await socrata('3ub5-4ph8', {
+    $select: 'development',
+    $where: `borough_block_lot=${building.bbl}`,
+    $group: 'development',
+    $order: 'development',
+    $limit: '1',
+  });
+  return rows.length > 0 ? { development: rows[0].development ?? null } : null;
+}
+
+/**
+ * Decides whether the building is a New York City Housing Authority (NYCHA)
+ * building. The answer is { isNycha, development }.
+ *
+ * isNycha is true when either source matches the building's bbl: the NYCHA
+ * Residential Addresses list has a row for it, or the PLUTO owner name contains
+ * "HOUSING AUTH". Each source alone misses a few NYCHA lots.
+ *
+ * isNycha is false when both lookups worked and neither matched. isNycha is
+ * null when no source matched and at least one lookup failed, so the site knows
+ * that the building could not be checked. development is the name from the
+ * address list, or null when the list has no match or its lookup failed.
+ *
+ * The owner name is used only to set the flag and is never returned.
+ */
+function nychaFlag(addressResult, plutoResult) {
+  const addressMatched = addressResult.status === 'fulfilled' && addressResult.value !== null;
+  const ownerName = plutoResult.status === 'fulfilled' ? plutoResult.value?.ownername : null;
+  const ownerMatched = typeof ownerName === 'string' && ownerName.toUpperCase().includes('HOUSING AUTH');
+
+  let isNycha;
+  if (addressMatched || ownerMatched) {
+    isNycha = true;
+  } else if (addressResult.status === 'rejected' || plutoResult.status === 'rejected') {
+    isNycha = null;
+  } else {
+    isNycha = false;
+  }
+
+  return {
+    isNycha,
+    development: addressMatched ? addressResult.value.development : null,
+  };
+}
+
+/**
+ * PLUTO values (64uk-42ks): the number of residential units (unitsRes) and the
+ * year the building was built (yearBuilt). PLUTO writes 0 when the value is
+ * unknown, and this function returns null for 0.
+ *
+ * Both values describe the tax lot, which can hold more than one building. When
+ * PLUTO has no row for the lot, both values are null. The owner name is never
+ * returned.
+ */
+async function pluto(building, shared) {
+  const row = await shared.plutoRow;
+  const unitsRes = Number(row?.unitsres);
+  const yearBuilt = Number(row?.yearbuilt);
+  return {
+    source: '64uk-42ks',
+    unitsRes: unitsRes > 0 ? unitsRes : null,
+    yearBuilt: yearBuilt > 0 ? yearBuilt : null,
+  };
+}
+
 const DATASETS = {
   evictions,
   hpdViolations,
@@ -440,6 +591,8 @@ const DATASETS = {
   hpdLitigation,
   dobViolations,
   ecbViolations,
+  nychaViolations,
+  pluto,
 };
 
 // ---------------------------------------------------------------------------
@@ -447,10 +600,25 @@ const DATASETS = {
 /**
  * The one function the site calls. Runs every dataset at the same time.
  * If one dataset fails, the others still come back, and the failure is noted.
+ *
+ * The PLUTO lookup runs once and is shared by the NYCHA flag and the pluto
+ * section. The NYCHA flag is returned next to bbl and bin, not inside datasets.
  */
 export async function getBuildingProfile(building) {
+  // Each lookup gets a catch handler right away, so that a failed lookup is
+  // never reported as an unhandled error. The failure is still seen by the
+  // code that awaits the same promise.
+  const shared = { plutoRow: plutoRow(building) };
+  shared.plutoRow.catch(() => {});
+  const addressPromise = nychaAddressRow(building);
+  addressPromise.catch(() => {});
+
   const names = Object.keys(DATASETS);
-  const results = await Promise.allSettled(names.map((name) => DATASETS[name](building)));
+  const [results, addressResult, plutoResult] = await Promise.all([
+    Promise.allSettled(names.map((name) => DATASETS[name](building, shared))),
+    Promise.allSettled([addressPromise]).then((list) => list[0]),
+    Promise.allSettled([shared.plutoRow]).then((list) => list[0]),
+  ]);
 
   const datasets = {};
   names.forEach((name, i) => {
@@ -463,6 +631,7 @@ export async function getBuildingProfile(building) {
   return {
     bbl: building.bbl,
     bin: building.bin,
+    nycha: nychaFlag(addressResult, plutoResult),
     zip: building.postalCode,
     fetchedAt: new Date().toISOString(),
     datasets,
